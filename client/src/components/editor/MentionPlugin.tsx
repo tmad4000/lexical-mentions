@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { $getSelection, $isRangeSelection } from "lexical";
 import {
@@ -13,6 +13,7 @@ const SUGGESTION_LIST_LENGTH = 5;
 
 export function MentionsPlugin() {
   const [editor] = useLexicalComposerContext();
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [mentionString, setMentionString] = useState<string | null>(null);
   const [mentionPosition, setMentionPosition] = useState<{
     top: number;
@@ -27,6 +28,11 @@ export function MentionsPlugin() {
       )
       .slice(0, SUGGESTION_LIST_LENGTH);
   }, [mentionString]);
+
+  // Reset selection when suggestions change
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [suggestions]);
 
   const insertMention = useCallback(
     (user: { name: string; id: string }) => {
@@ -48,6 +54,37 @@ export function MentionsPlugin() {
     if (text.endsWith('@')) return '';
     return match ? match[1] : null;
   }, []);
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (mentionString === null || suggestions.length === 0) return;
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev + 1) % suggestions.length);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (suggestions[selectedIndex]) {
+            insertMention(suggestions[selectedIndex]);
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          setMentionString(null);
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [mentionString, suggestions, selectedIndex, insertMention]);
 
   editor.registerUpdateListener(({ editorState }) => {
     editorState.read(() => {
@@ -85,11 +122,14 @@ export function MentionsPlugin() {
           }}
         >
           <ul className="py-2">
-            {suggestions.map((user) => (
+            {suggestions.map((user, index) => (
               <li
                 key={user.id}
-                className="px-4 py-2 hover:bg-primary/10 cursor-pointer"
+                className={`px-4 py-2 cursor-pointer ${
+                  index === selectedIndex ? 'bg-primary/10' : 'hover:bg-primary/10'
+                }`}
                 onClick={() => insertMention(user)}
+                onMouseEnter={() => setSelectedIndex(index)}
               >
                 {user.name}
               </li>
