@@ -63,27 +63,31 @@ export function MentionsPlugin() {
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
+          e.stopPropagation();
           setSelectedIndex((prev) => (prev + 1) % suggestions.length);
           break;
         case 'ArrowUp':
           e.preventDefault();
+          e.stopPropagation();
           setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
           break;
         case 'Enter':
+        case 'Tab':
           e.preventDefault();
-          if (suggestions[selectedIndex]) {
-            insertMention(suggestions[selectedIndex]);
-          }
+          e.stopPropagation();
+          insertMention(suggestions[selectedIndex]);
           break;
         case 'Escape':
           e.preventDefault();
+          e.stopPropagation();
           setMentionString(null);
           break;
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    // Use capture phase to handle events before they reach the editor
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => document.removeEventListener('keydown', handleKeyDown, true);
   }, [mentionString, suggestions, selectedIndex, insertMention]);
 
   editor.registerUpdateListener(({ editorState }) => {
