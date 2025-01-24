@@ -34,6 +34,14 @@ const initialConfig = {
   theme,
   onError,
   nodes: [MentionNode],
+  editorState: null,
+  editable: true,
+  // Add atomic node deletion behavior
+  nodeOverrides: {
+    text: {
+      atomicDelete: true,
+    },
+  },
 };
 
 export default function LexicalEditor() {
