@@ -1,13 +1,18 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND } from "lexical";
+import { $getSelection, $isRangeSelection } from "lexical";
 import { Button } from "@/components/ui/button";
 import { Bold, Italic, Underline } from "lucide-react";
 
 export function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
 
-  const formatText = (format: string) => {
-    editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
+  const formatText = (format: "bold" | "italic" | "underline") => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        selection.formatText(format);
+      }
+    });
   };
 
   return (

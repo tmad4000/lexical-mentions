@@ -2,10 +2,9 @@ import { useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { $getSelection, $isRangeSelection } from "lexical";
 import {
-  MentionNode,
   $createMentionNode,
   $isMentionNode,
-} from "@lexical/react/LexicalMentionNode";
+} from "./nodes/MentionNode";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { Card } from "@/components/ui/card";
 import { mockUsers } from "@/lib/mockUsers";
