@@ -7,6 +7,7 @@ import type {
   NodeKey,
   SerializedLexicalNode,
   Spread,
+  TextModeType,
 } from "lexical";
 
 import { $createTextNode, $getSelection, TextNode } from "lexical";
@@ -15,6 +16,13 @@ export type SerializedMentionNode = Spread<
   {
     mention: string;
     mentionName: string;
+    type: "mention";
+    version: 1;
+    text: string;
+    format: number;
+    detail: number;
+    style: string;
+    mode: TextModeType;
   },
   SerializedLexicalNode
 >;
@@ -69,6 +77,12 @@ export class MentionNode extends TextNode {
       mentionName: this.__text,
       type: "mention",
       version: 1,
+      text: this.__text,
+      format: this.getFormat(),
+      detail: this.getDetail(),
+      style: this.getStyle(),
+      mode: this.getMode(),
+
     };
   }
 
