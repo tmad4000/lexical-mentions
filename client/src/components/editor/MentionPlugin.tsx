@@ -50,11 +50,18 @@ export function MentionsPlugin() {
         const mentionStart = textContent.lastIndexOf('@', currentOffset);
         if (mentionStart === -1) return;
 
-        // Create a new selection from @ to current position
+        // Create a mention node with the user's name
         const mentionNode = $createMentionNode(user.name, user.id);
-        selection.setTextNodeRange(node, mentionStart, currentOffset);
 
-        // Replace the selected text with the mention
+        // Set the text range for replacement (from @ to current position)
+        selection.setTextNodeRange(
+          node, // Start node
+          mentionStart, // Start offset (@)
+          node, // End node (same as start for single line)
+          currentOffset // End offset (current cursor)
+        );
+
+        // Replace the selected text with the mention node
         selection.insertNodes([mentionNode]);
       });
       setMentionString(null);
