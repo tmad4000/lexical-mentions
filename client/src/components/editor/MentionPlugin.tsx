@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { $getSelection, $isRangeSelection } from "lexical";
+import { $getSelection, $isRangeSelection, TextNode } from "lexical";
 import {
   $createMentionNode,
   $isMentionNode,
@@ -40,7 +40,21 @@ export function MentionsPlugin() {
         const selection = $getSelection();
         if (!$isRangeSelection(selection)) return;
 
+        const node = selection.anchor.getNode();
+        if (!(node instanceof TextNode)) return;
+
+        const textContent = node.getTextContent();
+        const currentOffset = selection.anchor.offset;
+
+        // Find the position of the @ symbol
+        const mentionStart = textContent.lastIndexOf('@', currentOffset);
+        if (mentionStart === -1) return;
+
+        // Create a new selection from @ to current position
         const mentionNode = $createMentionNode(user.name, user.id);
+        selection.setTextNodeRange(node, mentionStart, currentOffset);
+
+        // Replace the selected text with the mention
         selection.insertNodes([mentionNode]);
       });
       setMentionString(null);
