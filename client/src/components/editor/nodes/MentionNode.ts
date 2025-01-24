@@ -70,6 +70,18 @@ export class MentionNode extends TextNode {
     };
   }
 
+  isTextEntity(): boolean {
+    return true;
+  }
+
+  canBeEmpty(): boolean {
+    return false;
+  }
+
+  splitText(): TextNode {
+    return this;
+  }
+
   exportJSON(): SerializedMentionNode {
     return {
       ...super.exportJSON(),
@@ -82,7 +94,6 @@ export class MentionNode extends TextNode {
       detail: this.getDetail(),
       style: this.getStyle(),
       mode: this.getMode(),
-
     };
   }
 
@@ -107,7 +118,7 @@ function convertMentionElement(domNode: HTMLElement): DOMConversionOutput {
 
 export function $createMentionNode(mentionName: string, mention: string): MentionNode {
   const mentionNode = new MentionNode(mention, mentionName);
-  mentionNode.setMode("segmented").toggleDirectionless();
+  mentionNode.setMode("token").toggleDirectionless();
   return mentionNode;
 }
 
