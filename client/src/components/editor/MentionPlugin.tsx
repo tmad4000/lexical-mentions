@@ -20,10 +20,10 @@ export function MentionsPlugin() {
   } | null>(null);
 
   const suggestions = useMemo(() => {
-    if (!mentionString) return [];
+    if (mentionString === null) return [];
     return mockUsers
       .filter((user) =>
-        user.name.toLowerCase().includes(mentionString.toLowerCase())
+        mentionString === "" ? true : user.name.toLowerCase().includes(mentionString.toLowerCase())
       )
       .slice(0, SUGGESTION_LIST_LENGTH);
   }, [mentionString]);
@@ -43,8 +43,9 @@ export function MentionsPlugin() {
   );
 
   const checkForMentionMatch = useCallback((text: string) => {
-    const mentionMatch = /@(\w+)$/;
+    const mentionMatch = /@(\w*)$/;
     const match = text.match(mentionMatch);
+    if (text.endsWith('@')) return '';
     return match ? match[1] : null;
   }, []);
 
@@ -74,7 +75,7 @@ export function MentionsPlugin() {
     });
   });
 
-  return mentionString && mentionPosition && suggestions.length > 0
+  return mentionString !== null && mentionPosition && suggestions.length > 0
     ? createPortal(
         <Card
           className="absolute z-50 w-64 shadow-lg"
